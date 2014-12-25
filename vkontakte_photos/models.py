@@ -58,31 +58,27 @@ class AlbumRemoteManager(AfterBeforeManagerMixin):
         return super(AlbumRemoteManager, self).fetch(**kwargs)
 
 
-class PhotoRemoteManager(VkontakteTimelineManager):
+class PhotoRemoteManager(AfterBeforeManagerMixin):
 
     timeline_cut_fieldname = 'created'
     timeline_force_ordering = True
 
     @transaction.commit_on_success
-    def fetch(self, album, ids=None, limit=None, extended=False, offset=0, photo_sizes=False, before=None, rev=0, after=None, **kwargs):
+    def fetch(self, album, ids=None, limit=None, extended=False, offset=0, photo_sizes=False, rev=0, **kwargs):
         if ids and not isinstance(ids, (tuple, list)):
             raise ValueError("Attribute 'ids' should be tuple or list")
-        if before and not after:
-            raise ValueError("Attribute `before` should be specified with attribute `after`")
-        if before and before < after:
-            raise ValueError("Attribute `before` should be later, than attribute `after`")
         # TODO: it seems rev attribute make no sence for order of response
         if rev == 1 and (after or before):
             raise ValueError("Attribute `rev` should be equal to 0 with defined `after` attribute")
 
-        kwargs = {
+        kwargs.update({
             'album_id': album.remote_id.split('_')[1],
             'extended': int(extended),
             'offset': int(offset),
             # photo_sizes
             # 1 - позволяет получать все размеры фотографий.
             'photo_sizes': int(photo_sizes),
-        }
+        })
         if album.owner:
             kwargs.update({'uid': album.owner.remote_id})
         elif album.group:
@@ -93,10 +89,6 @@ class PhotoRemoteManager(VkontakteTimelineManager):
             kwargs.update({'limit': limit})
 
         kwargs['rev'] = int(rev)
-
-        # special parameters
-        kwargs['after'] = after
-        kwargs['before'] = before
 
         # TODO: добавить поля
         # feed
