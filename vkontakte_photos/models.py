@@ -9,7 +9,7 @@ from parser import VkontaktePhotosParser
 import re
 
 from vkontakte_api.decorators import fetch_all
-from vkontakte_api.mixins import AfterBeforeManagerMixin
+from vkontakte_api.mixins import CountOffsetManagerMixin, AfterBeforeManagerMixin
 from vkontakte_api.models import VkontakteTimelineManager, VkontakteModel, VkontakteCRUDModel
 from vkontakte_groups.models import Group
 
@@ -58,13 +58,13 @@ class AlbumRemoteManager(AfterBeforeManagerMixin):
         return super(AlbumRemoteManager, self).fetch(**kwargs)
 
 
-class PhotoRemoteManager(AfterBeforeManagerMixin):
+class PhotoRemoteManager(CountOffsetManagerMixin, AfterBeforeManagerMixin):
 
     timeline_cut_fieldname = 'created'
     timeline_force_ordering = True
 
     @transaction.commit_on_success
-    def fetch(self, album, ids=None, limit=None, extended=False, offset=0, photo_sizes=False, rev=0, **kwargs):
+    def fetch(self, album, ids=None, extended=False, photo_sizes=False, rev=0, **kwargs):
         if ids and not isinstance(ids, (tuple, list)):
             raise ValueError("Attribute 'ids' should be tuple or list")
         # TODO: it seems rev attribute make no sence for order of response
@@ -74,7 +74,6 @@ class PhotoRemoteManager(AfterBeforeManagerMixin):
         kwargs.update({
             'album_id': album.remote_id.split('_')[1],
             'extended': int(extended),
-            'offset': int(offset),
             # photo_sizes
             # 1 - позволяет получать все размеры фотографий.
             'photo_sizes': int(photo_sizes),
@@ -85,8 +84,6 @@ class PhotoRemoteManager(AfterBeforeManagerMixin):
             kwargs.update({'gid': album.group.remote_id})
         if ids:
             kwargs.update({'photo_ids': ','.join(map(str, ids))})
-        if limit:
-            kwargs.update({'limit': limit})
 
         kwargs['rev'] = int(rev)
 
