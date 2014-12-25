@@ -1,18 +1,19 @@
 # -*- coding: utf-8 -*-
-import logging
-from parser import VkontaktePhotosParser
-import re
-
 from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
 from django.db import models, transaction
 from django.utils import timezone
 from django.utils.encoding import python_2_unicode_compatible
+import logging
+from parser import VkontaktePhotosParser
+import re
+
 from vkontakte_api.decorators import fetch_all
+from vkontakte_api.mixins import AfterBeforeManagerMixin
 from vkontakte_api.models import VkontakteTimelineManager, VkontakteModel, VkontakteCRUDModel
 from vkontakte_groups.models import Group
-from vkontakte_users.models import User
 
+from vkontakte_users.models import User
 log = logging.getLogger('vkontakte_photos')
 
 ALBUM_PRIVACY_CHOCIES = (
@@ -23,7 +24,7 @@ ALBUM_PRIVACY_CHOCIES = (
 )
 
 
-class AlbumRemoteManager(VkontakteTimelineManager):
+class AlbumRemoteManager(AfterBeforeManagerMixin):
 
     timeline_force_ordering = True
 
@@ -31,21 +32,16 @@ class AlbumRemoteManager(VkontakteTimelineManager):
         return instance.updated or instance.created or timezone.now()
 
     @transaction.commit_on_success
-    def fetch(self, user=None, group=None, ids=None, need_covers=False, before=None, after=None, **kwargs):
+    def fetch(self, user=None, group=None, ids=None, need_covers=False, **kwargs):
         if not user and not group:
             raise ValueError("You must specify user of group, which albums you want to fetch")
         if ids and not isinstance(ids, (tuple, list)):
             raise ValueError("Attribute 'ids' should be tuple or list")
-        if before and not after:
-            raise ValueError("Attribute `before` should be specified with attribute `after`")
-        if before and before < after:
-            raise ValueError("Attribute `before` should be later, than attribute `after`")
 
-        kwargs = {
-            # need_covers
-            # 1 - будет возвращено дополнительное поле thumb_src. По умолчанию поле thumb_src не возвращается.
-            'need_covers': int(need_covers)
-        }
+        # need_covers
+        # 1 - будет возвращено дополнительное поле thumb_src. По умолчанию поле thumb_src не возвращается.
+        kwargs['need_covers'] = int(need_covers)
+
         # uid
         # ID пользователя, которому принадлежат альбомы. По умолчанию – ID текущего пользователя.
         if user:
@@ -58,10 +54,6 @@ class AlbumRemoteManager(VkontakteTimelineManager):
         # перечисленные через запятую ID альбомов.
         if ids:
             kwargs.update({'aids': ','.join(map(str, ids))})
-
-        # special parameters
-        kwargs['after'] = after
-        kwargs['before'] = before
 
         return super(AlbumRemoteManager, self).fetch(**kwargs)
 
