@@ -418,7 +418,7 @@ class Comment(VkontakteModel, VkontakteCRUDModel):
         verbose_name_plural = u'Коммментарии фотографий Вконтакте'
 
     @property
-    def remote_owner_id(self):
+    def owner_remote_id(self):
         return self.photo.remote_id.split('_')[0]
 
     @property
@@ -429,7 +429,7 @@ class Comment(VkontakteModel, VkontakteCRUDModel):
         if self.author == self.photo.group:
             from_group = True
         kwargs.update({
-            'owner_id': self.remote_owner_id,
+            'owner_id': self.owner_remote_id,
             'photo_id': self.photo.remote_id_short,
             'message': self.text,
 #            'reply_to_comment': self.reply_for.id if self.reply_for else '',
@@ -440,7 +440,7 @@ class Comment(VkontakteModel, VkontakteCRUDModel):
 
     def prepare_update_params(self, **kwargs):
         kwargs.update({
-            'owner_id': self.remote_owner_id,
+            'owner_id': self.owner_remote_id,
             'comment_id': self.remote_id_short,
             'message': self.text,
             'attachments': kwargs.get('attachments', ''),
@@ -449,13 +449,13 @@ class Comment(VkontakteModel, VkontakteCRUDModel):
 
     def prepare_delete_params(self):
         return {
-            'owner_id': self.remote_owner_id,
+            'owner_id': self.owner_remote_id,
             'comment_id': self.remote_id_short
         }
 
     def parse_remote_id_from_response(self, response):
         if response:
-            return '%s_%s' % (self.remote_owner_id, response)
+            return '%s_%s' % (self.owner_remote_id, response)
         return None
 
     def get_or_create_group_or_user(self, remote_id):
@@ -487,4 +487,4 @@ class Comment(VkontakteModel, VkontakteCRUDModel):
         super(Comment, self).parse(response)
 
         if '_' not in str(self.remote_id):
-            self.remote_id = '%s_%s' % (self.remote_owner_id, self.remote_id)
+            self.remote_id = '%s_%s' % (self.owner_remote_id, self.remote_id)
