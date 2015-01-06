@@ -9,8 +9,8 @@ from parser import VkontaktePhotosParser
 import re
 
 from vkontakte_api.decorators import fetch_all
-from vkontakte_api.mixins import CountOffsetManagerMixin, AfterBeforeManagerMixin
-from vkontakte_api.models import VkontakteTimelineManager, VkontakteModel, VkontakteCRUDModel
+from vkontakte_api.mixins import CountOffsetManagerMixin, AfterBeforeManagerMixin, OwnerableModelMixin
+from vkontakte_api.models import VkontakteTimelineManager, VkontakteModel, VkontakteCRUDModel, VkontaktePKModel
 from vkontakte_groups.models import Group
 
 from vkontakte_users.models import User
@@ -203,13 +203,15 @@ class PhotosAbstractModel(VkontakteModel):
 
 
 @python_2_unicode_compatible
-class Album(PhotosAbstractModel):
+class Album(OwnerableModelMixin, VkontaktePKModel):
+
+    methods_namespace = 'photos'
 
     remote_pk_field = 'aid'
     slug_prefix = 'album'
 
     # TODO: migrate to ContentType framework, remove vkontakte_users and vkontakte_groups dependencies
-    owner = models.ForeignKey(User, verbose_name=u'Владелец альбома', null=True, related_name='photo_albums')
+    #owner = models.ForeignKey(User, verbose_name=u'Владелец альбома', null=True, related_name='photo_albums')
     group = models.ForeignKey(Group, verbose_name=u'Группа альбома', null=True, related_name='photo_albums')
 
     thumb_id = models.PositiveIntegerField()
@@ -242,15 +244,16 @@ class Album(PhotosAbstractModel):
         return Photo.remote.fetch(album=self, *args, **kwargs)
 
 
-class Photo(PhotosAbstractModel):
+class Photo(OwnerableModelMixin, VkontaktePKModel):
 
+    methods_namespace = 'photos'
     remote_pk_field = 'pid'
     slug_prefix = 'photo'
 
     album = models.ForeignKey(Album, verbose_name=u'Альбом', related_name='photos')
 
     # TODO: switch to ContentType, remove owner and group foreignkeys
-    owner = models.ForeignKey(User, verbose_name=u'Владелец фотографии', null=True, related_name='photos')
+    #owner = models.ForeignKey(User, verbose_name=u'Владелец фотографии', null=True, related_name='photos')
     group = models.ForeignKey(Group, verbose_name=u'Группа фотографии', null=True, related_name='photos')
 
     user = models.ForeignKey(User, verbose_name=u'Автор фотографии', null=True, related_name='photos_author')
