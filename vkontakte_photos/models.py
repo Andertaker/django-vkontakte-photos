@@ -212,7 +212,7 @@ class Album(OwnerableModelMixin, VkontaktePKModel):
 
     # TODO: migrate to ContentType framework, remove vkontakte_users and vkontakte_groups dependencies
     #owner = models.ForeignKey(User, verbose_name=u'Владелец альбома', null=True, related_name='photo_albums')
-    group = models.ForeignKey(Group, verbose_name=u'Группа альбома', null=True, related_name='photo_albums')
+    #group = models.ForeignKey(Group, verbose_name=u'Группа альбома', null=True, related_name='photo_albums')
 
     thumb_id = models.PositiveIntegerField()
     thumb_src = models.CharField(u'Обложка альбома', max_length='200')
@@ -254,7 +254,7 @@ class Photo(OwnerableModelMixin, VkontaktePKModel):
 
     # TODO: switch to ContentType, remove owner and group foreignkeys
     #owner = models.ForeignKey(User, verbose_name=u'Владелец фотографии', null=True, related_name='photos')
-    group = models.ForeignKey(Group, verbose_name=u'Группа фотографии', null=True, related_name='photos')
+    #group = models.ForeignKey(Group, verbose_name=u'Группа фотографии', null=True, related_name='photos')
 
     user = models.ForeignKey(User, verbose_name=u'Автор фотографии', null=True, related_name='photos_author')
 
