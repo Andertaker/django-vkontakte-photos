@@ -338,8 +338,8 @@ class Photo(OwnerableModelMixin, LikableModelMixin, VkontaktePKModel):
         post_data = {
             'act': 'a_get_stats',
             'al': 1,
-            'list': 'album%s' % self.album.remote_id,
-            'object': 'photo%s' % self.remote_id,
+            'list': 'album%s_%s' % (self.album.owner_remote_id, self.album.remote_id),
+            'object': 'photo%s_%s' % (self.album.remote_id, self.remote_id),
         }
         parser = VkontaktePhotosParser().request('/like.php', data=post_data)
 
