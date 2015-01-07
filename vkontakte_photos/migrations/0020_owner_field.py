@@ -41,7 +41,7 @@ class Migration(DataMigration):
 
         for p in photos:
             if p.group:
-                p.owner_id = a.group.pk
+                p.owner_id = p.group.pk
                 p.owner_content_type_id = group_ct_id
             elif p.owner_id:
                 # owner_id already set
