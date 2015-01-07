@@ -8,15 +8,19 @@ from south.v2 import DataMigration
 class Migration(DataMigration):
 
     def forwards(self, orm):
-        # Make remote_id Primary Key
+        "Make remote_id Primary Key"
 
-        db.delete_primary_key('vkontakte_photos_album')
+        # Remove Foreign key from Comments and likes
+        db.delete_foreign_key('vkontakte_photos_comment', 'photo_id')
+        db.delete_foreign_key('vkontakte_photos_photo_like_users', 'photo_id')
+
+        # db.delete_primary_key('vkontakte_photos_album')
         #db.delete_column(u'vkontakte_photos_album', u'id')
 
         db.delete_primary_key('vkontakte_photos_photo')
         #db.delete_column(u'vkontakte_photos_photo', u'id')
 
-        db.create_primary_key('vkontakte_photos_album', ['remote_id'])
+        #db.create_primary_key('vkontakte_photos_album', ['remote_id'])
         db.create_primary_key('vkontakte_photos_photo', ['remote_id'])
 
     def backwards(self, orm):
