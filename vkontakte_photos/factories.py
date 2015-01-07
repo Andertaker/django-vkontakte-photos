@@ -1,9 +1,12 @@
-from vkontakte_users.factories import UserFactory
-from vkontakte_groups.factories import GroupFactory
-from models import Album, Photo
-from datetime import datetime
-import factory
+from django.utils import timezone
 import random
+import factory
+
+from vkontakte_groups.factories import GroupFactory
+from vkontakte_users.factories import UserFactory
+
+from . models import Album, Photo
+
 
 class AlbumFactory(factory.DjangoModelFactory):
     FACTORY_FOR = Album
@@ -11,11 +14,12 @@ class AlbumFactory(factory.DjangoModelFactory):
     remote_id = factory.LazyAttributeSequence(lambda o, n: '-%s_%s' % (o.group.remote_id, n))
     thumb_id = factory.Sequence(lambda n: n)
 
-    group = factory.SubFactory(GroupFactory)
+    #owner = factory.SubFactory(GroupFactory)
 
-    created = datetime.now()
-    updated = datetime.now()
+    created = timezone.now()
+    updated = timezone.now()
     size = 1
+
 
 class PhotoFactory(factory.DjangoModelFactory):
     FACTORY_FOR = Photo
@@ -23,8 +27,8 @@ class PhotoFactory(factory.DjangoModelFactory):
     remote_id = factory.LazyAttributeSequence(lambda o, n: '%s_%s' % (o.group.remote_id, n))
     user = factory.SubFactory(UserFactory)
     album = factory.SubFactory(AlbumFactory)
-    group = factory.SubFactory(GroupFactory)
+    #owner = factory.SubFactory(GroupFactory)
 
-    created = datetime.now()
+    date = timezone.now()
     width = 10
     height = 10
