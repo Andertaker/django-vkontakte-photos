@@ -28,6 +28,7 @@ class PhotoFactory(factory.DjangoModelFactory):
     user = factory.SubFactory(UserFactory)
     album = factory.SubFactory(AlbumFactory)
     #owner = factory.SubFactory(GroupFactory)
+    likes_count = 0
 
     date = timezone.now()
     width = 10

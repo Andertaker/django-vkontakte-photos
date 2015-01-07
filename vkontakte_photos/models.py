@@ -9,7 +9,7 @@ from parser import VkontaktePhotosParser
 import re
 
 from vkontakte_api.decorators import fetch_all
-from vkontakte_api.mixins import CountOffsetManagerMixin, AfterBeforeManagerMixin, OwnerableModelMixin
+from vkontakte_api.mixins import CountOffsetManagerMixin, AfterBeforeManagerMixin, OwnerableModelMixin, LikableModelMixin
 from vkontakte_api.models import VkontakteTimelineManager, VkontakteModel, VkontakteCRUDModel, VkontaktePKModel
 from vkontakte_groups.models import Group
 
@@ -245,9 +245,10 @@ class Album(OwnerableModelMixin, VkontaktePKModel):
         return Photo.remote.fetch(album=self, *args, **kwargs)
 
 
-class Photo(OwnerableModelMixin, VkontaktePKModel):
+class Photo(OwnerableModelMixin, LikableModelMixin, VkontaktePKModel):
 
     methods_namespace = 'photos'
+    likes_remote_type = 'photo'
     slug_prefix = 'photo'
 
     album = models.ForeignKey(Album, verbose_name=u'Альбом', related_name='photos')
@@ -267,12 +268,12 @@ class Photo(OwnerableModelMixin, VkontaktePKModel):
     width = models.PositiveIntegerField(null=True)
     height = models.PositiveIntegerField(null=True)
 
-    likes_count = models.PositiveIntegerField(u'Лайков', default=0)
+    #likes_count = models.PositiveIntegerField(u'Лайков', default=0)
     comments_count = models.PositiveIntegerField(u'Комментариев', default=0)
     actions_count = models.PositiveIntegerField(u'Комментариев', default=0)
     tags_count = models.PositiveIntegerField(u'Тегов', default=0)
 
-    like_users = models.ManyToManyField(User, related_name='like_photos')
+    #like_users = models.ManyToManyField(User, related_name='like_photos')
 
     text = models.TextField()
 
@@ -295,9 +296,12 @@ class Photo(OwnerableModelMixin, VkontaktePKModel):
         super(Photo, self).parse(response)
 
         # counters
-        for field_name in ['likes', 'comments', 'tags']:
-            if field_name in response and 'count' in response[field_name]:
-                setattr(self, '%s_count' % field_name, response[field_name]['count'])
+#        for field_name in ['likes', 'comments', 'tags']:
+#            if field_name in response and 'count' in response[field_name]:
+#                setattr(self, '%s_count' % field_name, response[field_name]['count'])
+
+        if not self.likes_count:
+            self.likes_count = 0
 
         self.actions_count = self.likes_count + self.comments_count
 
@@ -343,26 +347,6 @@ class Photo(OwnerableModelMixin, VkontaktePKModel):
         if len(values):
             self.likes_count = int(values[0])
             self.save()
-
-    @transaction.commit_on_success
-    def fetch_likes(self, *args, **kwargs):
-
-#        kwargs['offset'] = int(kwargs.pop('offset', 0))
-        kwargs['likes_type'] = 'photo'
-        kwargs['item_id'] = self.remote_id.split('_')[1]
-        kwargs['owner_id'] = self.group.remote_id
-        if isinstance(self.group, Group):
-            kwargs['owner_id'] *= -1
-
-        log.debug('Fetching likes of %s %s of owner "%s"' % (self._meta.module_name, self.remote_id, self.group))
-
-        users = User.remote.fetch_instance_likes(self, *args, **kwargs)
-
-        # update self.likes
-        self.likes_count = self.like_users.count()
-        self.save()
-
-        return users
 
     @transaction.commit_on_success
     def fetch_comments(self, *args, **kwargs):

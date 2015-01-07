@@ -152,7 +152,7 @@ class VkontaktePhotosTest(TestCase):
         self.assertGreater(photo.likes_count, 0)
         self.assertEqual(photo.likes_count, len(users))
         self.assertEqual(photo.likes_count, User.objects.count() - users_initial)
-        self.assertEqual(photo.likes_count, photo.like_users.count())
+        self.assertEqual(photo.likes_count, photo.likes_users.count())
 
     def test_fetch_photo_likes_parser(self):
 
