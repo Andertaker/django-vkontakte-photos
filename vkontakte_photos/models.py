@@ -61,7 +61,8 @@ class AlbumRemoteManager(AfterBeforeManagerMixin):
 
 class PhotoRemoteManager(CountOffsetManagerMixin, AfterBeforeManagerMixin):
 
-    timeline_cut_fieldname = 'created'
+    version = 5.27
+    timeline_cut_fieldname = 'date'
     timeline_force_ordering = True
 
     @transaction.commit_on_success
@@ -73,16 +74,17 @@ class PhotoRemoteManager(CountOffsetManagerMixin, AfterBeforeManagerMixin):
             raise ValueError("Attribute `rev` should be equal to 0 with defined `after` attribute")
 
         kwargs.update({
-            'album_id': album.remote_id.split('_')[1],
+            #'album_id': album.remote_id.split('_')[1],
             'extended': int(extended),
             # photo_sizes
             # 1 - позволяет получать все размеры фотографий.
             'photo_sizes': int(photo_sizes),
         })
-        if album.owner:
-            kwargs.update({'uid': album.owner.remote_id})
-        elif album.group:
-            kwargs.update({'gid': album.group.remote_id})
+
+        if album:
+            kwargs['album_id'] = album.remote_id
+            kwargs['owner_id'] = album.owner_remote_id
+
         if ids:
             kwargs.update({'photo_ids': ','.join(map(str, ids))})
 
@@ -246,7 +248,6 @@ class Album(OwnerableModelMixin, VkontaktePKModel):
 class Photo(OwnerableModelMixin, VkontaktePKModel):
 
     methods_namespace = 'photos'
-    remote_pk_field = 'pid'
     slug_prefix = 'photo'
 
     album = models.ForeignKey(Album, verbose_name=u'Альбом', related_name='photos')
@@ -275,7 +276,7 @@ class Photo(OwnerableModelMixin, VkontaktePKModel):
 
     text = models.TextField()
 
-    created = models.DateTimeField(db_index=True)
+    date = models.DateTimeField(db_index=True)
 
     objects = models.Manager()
     remote = PhotoRemoteManager(remote_pk=('remote_id',), methods={
@@ -285,6 +286,10 @@ class Photo(OwnerableModelMixin, VkontaktePKModel):
     class Meta:
         verbose_name = u'Фотография Вконтакте'
         verbose_name_plural = u'Фотографии Вконтакте'
+
+    @property
+    def created(self):
+        return self.date
 
     def parse(self, response):
         super(Photo, self).parse(response)
@@ -299,10 +304,11 @@ class Photo(OwnerableModelMixin, VkontaktePKModel):
         if 'user_id' in response:
             self.user = User.objects.get_or_create(remote_id=response['user_id'])[0]
 
-        try:
-            self.album = Album.objects.get(remote_id=self.get_remote_id(response['aid']))
-        except Album.DoesNotExist:
-            raise Exception('Impossible to save photo for unexisted album %s' % (self.get_remote_id(response['aid']),))
+        # try:
+        #    self.album = Album.objects.get(remote_id=self.get_remote_id(response['aid']))
+        # except Album.DoesNotExist:
+        #    raise Exception('Impossible to save photo for unexisted album %s' % (self.get_remote_id(response['aid']),))
+        self.album_id = response.get('album_id', None)
 
     def fetch_comments_parser(self):
         '''
