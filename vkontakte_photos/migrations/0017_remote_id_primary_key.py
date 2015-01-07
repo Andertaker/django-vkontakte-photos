@@ -11,10 +11,10 @@ class Migration(DataMigration):
         # Make remote_id Primary Key
 
         db.delete_primary_key('vkontakte_photos_album')
-        db.delete_column(u'vkontakte_photos_album', u'id')
+        #db.delete_column(u'vkontakte_photos_album', u'id')
 
         db.delete_primary_key('vkontakte_photos_photo')
-        db.delete_column(u'vkontakte_photos_photo', u'id')
+        #db.delete_column(u'vkontakte_photos_photo', u'id')
 
         db.create_primary_key('vkontakte_photos_album', ['remote_id'])
         db.create_primary_key('vkontakte_photos_photo', ['remote_id'])
@@ -50,7 +50,7 @@ class Migration(DataMigration):
             'description': ('django.db.models.fields.TextField', [], {}),
             'fetched': ('django.db.models.fields.DateTimeField', [], {'db_index': 'True', 'null': 'True', 'blank': 'True'}),
             'group': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'photo_albums'", 'null': 'True', 'to': u"orm['vkontakte_groups.Group']"}),
-            # u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'owner': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'photo_albums'", 'null': 'True', 'to': u"orm['vkontakte_users.User']"}),
             'privacy': ('django.db.models.fields.PositiveIntegerField', [], {'null': 'True'}),
             #'remote_id': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': "'20'"}),
@@ -82,7 +82,7 @@ class Migration(DataMigration):
             'fetched': ('django.db.models.fields.DateTimeField', [], {'db_index': 'True', 'null': 'True', 'blank': 'True'}),
             'group': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'photos'", 'null': 'True', 'to': u"orm['vkontakte_groups.Group']"}),
             'height': ('django.db.models.fields.PositiveIntegerField', [], {'null': 'True'}),
-            # u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'like_users': ('django.db.models.fields.related.ManyToManyField', [], {'related_name': "'like_photos'", 'symmetrical': 'False', 'to': u"orm['vkontakte_users.User']"}),
             'likes_count': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0'}),
             'owner': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'photos'", 'null': 'True', 'to': u"orm['vkontakte_users.User']"}),
