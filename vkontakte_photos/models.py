@@ -25,6 +25,7 @@ ALBUM_PRIVACY_CHOCIES = (
 
 
 class AlbumRemoteManager(AfterBeforeManagerMixin):
+    version = 5.27
 
     timeline_force_ordering = True
 
@@ -32,28 +33,28 @@ class AlbumRemoteManager(AfterBeforeManagerMixin):
         return instance.updated or instance.created or timezone.now()
 
     @transaction.commit_on_success
-    def fetch(self, user=None, group=None, ids=None, need_covers=False, **kwargs):
-        if not user and not group:
-            raise ValueError("You must specify user of group, which albums you want to fetch")
+    def fetch(self, user=None, group=None, owner=None, ids=None, need_covers=False, **kwargs):
+        if not (user or group):
+            #raise ValueError("You must specify user of group, which albums you want to fetch")
+            if not owner:
+                raise ValueError("You must specify owner, which albums you want to fetch")
+
         if ids and not isinstance(ids, (tuple, list)):
             raise ValueError("Attribute 'ids' should be tuple or list")
+
+        if not owner:
+            owner = user or group
+
+        kwargs['owner_id'] = self.model.get_owner_remote_id(owner)
 
         # need_covers
         # 1 - будет возвращено дополнительное поле thumb_src. По умолчанию поле thumb_src не возвращается.
         kwargs['need_covers'] = int(need_covers)
 
-        # uid
-        # ID пользователя, которому принадлежат альбомы. По умолчанию – ID текущего пользователя.
-        if user:
-            kwargs.update({'uid': user.remote_id})
-        # gid
-        # ID группы, которой принадлежат альбомы.
-        if group:
-            kwargs.update({'gid': group.remote_id})
         # aids
         # перечисленные через запятую ID альбомов.
         if ids:
-            kwargs.update({'aids': ','.join(map(str, ids))})
+            kwargs.update({'album_ids': ','.join(map(str, ids))})
 
         return super(AlbumRemoteManager, self).fetch(**kwargs)
 
@@ -206,8 +207,6 @@ class PhotosAbstractModel(VkontakteModel):
 class Album(OwnerableModelMixin, VkontaktePKModel):
 
     methods_namespace = 'photos'
-
-    remote_pk_field = 'aid'
     slug_prefix = 'album'
 
     # TODO: migrate to ContentType framework, remove vkontakte_users and vkontakte_groups dependencies
