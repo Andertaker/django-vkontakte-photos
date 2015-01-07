@@ -10,17 +10,32 @@ class Migration(DataMigration):
     def forwards(self, orm):
         "Make remote_id Primary Key"
 
+        # Remove PK from Album
+        db.delete_foreign_key('vkontakte_photos_photo', 'album_id')
+
+        photos = orm.Photo.objects.only('album').all()  #
+
+        for p in photos:
+            album = orm.Album.objects.get(id=p.album_id)
+            p.album_id = album.remote_id
+            p.save()
+
+        db.delete_primary_key('vkontakte_photos_album')
+        #db.delete_column(u'vkontakte_photos_album', u'id')
+
+        db.create_primary_key('vkontakte_photos_album', ['remote_id'])
+        db.alter_column('vkontakte_photos_photo', 'album_id', models.ForeignKey(
+            orm['vkontakte_photos.Album'], null=True, blank=True))
+
+        # Remove PK from Photo
         # Remove Foreign key from Comments and likes
         db.delete_foreign_key('vkontakte_photos_comment', 'photo_id')
         db.delete_foreign_key('vkontakte_photos_photo_like_users', 'photo_id')
 
-        # db.delete_primary_key('vkontakte_photos_album')
-        #db.delete_column(u'vkontakte_photos_album', u'id')
-
         db.delete_primary_key('vkontakte_photos_photo')
         #db.delete_column(u'vkontakte_photos_photo', u'id')
 
-        #db.create_primary_key('vkontakte_photos_album', ['remote_id'])
+        # Create Primary Keys
         db.create_primary_key('vkontakte_photos_photo', ['remote_id'])
 
     def backwards(self, orm):
