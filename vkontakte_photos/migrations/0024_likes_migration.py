@@ -45,7 +45,7 @@ class Migration(DataMigration):
         for r in dictfetchall(cursor):
             # print r
             cursor.execute("""UPDATE vkontakte_photos_photo_like_users 
-                SET photo_id=%s, time_to=%s
+                SET photo_id=%s, time_from='%s'
                 WHERE id=%s""" % (r['remote_id'], r['fetched'], r['id'])
                            )
 
