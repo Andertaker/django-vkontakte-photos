@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
-
 from django.db import connection
-
 from django.db import models
 from south.db import db
 from south.utils import datetime_utils as datetime
@@ -20,37 +18,8 @@ def dictfetchall(cursor):
 class Migration(DataMigration):
 
     def forwards(self, orm):
-        # already deleted before
-        #db.delete_foreign_key('vkontakte_photos_photo_like_users', 'photo_id')
-
-        # Adding field 'Comment.like_users.through.time_from'
-        db.add_column('vkontakte_photos_photo_like_users', 'time_from',
-                      self.gf('django.db.models.fields.DateTimeField')(null=True, db_index=True),
-                      keep_default=False)
-
-        # Adding field 'Comment.like_users.through.time_to'
-        db.add_column('vkontakte_photos_photo_like_users', 'time_to',
-                      self.gf('django.db.models.fields.DateTimeField')(null=True, db_index=True),
-                      keep_default=False)
-
-        cursor = connection.cursor()
-        cursor.execute("""
-            SELECT p.remote_id, p.fetched,
-                l.id, l.photo_id, l.user_id
-
-            FROM vkontakte_photos_photo as p
-            JOIN vkontakte_photos_photo_like_users  as l  ON (p.id =l.photo_id)
-        """)
-
-        for r in dictfetchall(cursor):
-            # print r
-            cursor.execute("""UPDATE vkontakte_photos_photo_like_users 
-                SET photo_id=%s, time_to=%s
-                WHERE id=%s""" % (r['remote_id'], r['fetched'], r['id'])
-                           )
-
-        db.alter_column('vkontakte_photos_photo_like_users', 'photo_id', models.ForeignKey(
-            orm['vkontakte_photos.Photo']))
+        db.rename_table('vkontakte_photos_photo_like_users',
+                        'vkontakte_photos_photo_likes_users')
 
     def backwards(self, orm):
         "Write your backwards methods here."
