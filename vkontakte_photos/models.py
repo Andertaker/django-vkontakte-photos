@@ -11,7 +11,6 @@ import re
 from vkontakte_api.decorators import fetch_all
 from vkontakte_api.mixins import CountOffsetManagerMixin, AfterBeforeManagerMixin, OwnerableModelMixin, LikableModelMixin
 from vkontakte_api.models import VkontakteTimelineManager, VkontakteModel, VkontakteCRUDModel, VkontaktePKModel
-#from vkontakte_groups.models import Group
 from vkontakte_comments.mixins import CommentableModelMixin
 
 from vkontakte_users.models import User
@@ -102,58 +101,8 @@ class PhotoRemoteManager(CountOffsetManagerMixin, AfterBeforeManagerMixin):
         return super(PhotoRemoteManager, self).fetch(**kwargs)
 
 
-class PhotosAbstractModel(VkontakteModel):
-
-    methods_namespace = 'photos'
-
-    remote_id = models.CharField(u'ID', max_length='20', help_text=u'Уникальный идентификатор', unique=True)
-
-    class Meta:
-        abstract = True
-
-    @property
-    def remote_id_short(self):
-        return self.remote_id.split('_')[1]
-
-    @property
-    def slug(self):
-        return self.slug_prefix + str(self.remote_id)
-
-    def get_remote_id(self, id):
-        '''
-        Returns unique remote_id, contains from 2 parts: remote_id of owner or group and remote_id of photo object
-        TODO: перейти на ContentType и избавиться от метода
-        '''
-        if self.owner:
-            remote_id = self.owner.remote_id
-        elif self.group:
-            remote_id = -1 * self.group.remote_id
-
-        return '%s_%s' % (remote_id, id)
-
-    def parse(self, response):
-        # TODO: перейти на ContentType и избавиться от метода
-        owner_id = int(response.pop('owner_id'))
-        if owner_id > 0:
-            self.owner = User.objects.get_or_create(remote_id=owner_id)[0]
-        else:
-            self.group = Group.objects.get_or_create(remote_id=abs(owner_id))[0]
-
-        super(PhotosAbstractModel, self).parse(response)
-
-        self.remote_id = self.get_remote_id(self.remote_id)
-
-
 @python_2_unicode_compatible
 class Album(OwnerableModelMixin, VkontaktePKModel):
-
-    #methods_namespace = 'photos'
-    slug_prefix = 'album'
-
-    # TODO: migrate to ContentType framework, remove vkontakte_users and vkontakte_groups dependencies
-    #owner = models.ForeignKey(User, verbose_name=u'Владелец альбома', null=True, related_name='photo_albums')
-    #group = models.ForeignKey(Group, verbose_name=u'Группа альбома', null=True, related_name='photo_albums')
-
     thumb_id = models.PositiveIntegerField()
     thumb_src = models.CharField(u'Обложка альбома', max_length='200')
 
@@ -190,18 +139,10 @@ class Album(OwnerableModelMixin, VkontaktePKModel):
 
 class Photo(OwnerableModelMixin, LikableModelMixin, CommentableModelMixin, VkontaktePKModel):
 
-    #methods_namespace = 'photos'
-    slug_prefix = 'photo'
-
     comments_remote_related_name = 'photo_id'
     likes_remote_type = 'photo'
 
     album = models.ForeignKey(Album, verbose_name=u'Альбом', related_name='photos')
-
-    # TODO: switch to ContentType, remove owner and group foreignkeys
-    #owner = models.ForeignKey(User, verbose_name=u'Владелец фотографии', null=True, related_name='photos')
-    #group = models.ForeignKey(Group, verbose_name=u'Группа фотографии', null=True, related_name='photos')
-
     user = models.ForeignKey(User, verbose_name=u'Автор фотографии', null=True, related_name='photos_author')
 
     #src = models.CharField(u'Иконка', max_length='200')
@@ -219,12 +160,8 @@ class Photo(OwnerableModelMixin, LikableModelMixin, CommentableModelMixin, Vkont
     width = models.PositiveIntegerField(null=True)
     height = models.PositiveIntegerField(null=True)
 
-    #likes_count = models.PositiveIntegerField(u'Лайков', default=0)
-    #comments_count = models.PositiveIntegerField(u'Комментариев', default=0)
     actions_count = models.PositiveIntegerField(u'Комментариев', default=0)
     tags_count = models.PositiveIntegerField(u'Тегов', default=0)
-
-    #like_users = models.ManyToManyField(User, related_name='like_photos')
 
     text = models.TextField()
 
