@@ -35,7 +35,7 @@ class AlbumAdmin(VkontakteModelAdmin):
 class PhotoAdmin(VkontakteModelAdmin):
 
     def image_preview(self, obj):
-        return u'<a href="%s"><img src="%s" height="30" /></a>' % (obj.src_big, obj.src)
+        return u'<a href="%s"><img src="%s" height="30" /></a>' % (obj.photo_604, obj.photo_130)
     image_preview.short_description = u'Картинка'
     image_preview.allow_tags = True
 

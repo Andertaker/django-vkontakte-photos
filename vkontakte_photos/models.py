@@ -200,11 +200,17 @@ class Photo(OwnerableModelMixin, LikableModelMixin, CommentableModelMixin, Vkont
 
     user = models.ForeignKey(User, verbose_name=u'Автор фотографии', null=True, related_name='photos_author')
 
-    src = models.CharField(u'Иконка', max_length='200')
-    src_big = models.CharField(u'Большая', max_length='200')
-    src_small = models.CharField(u'Маленькая', max_length='200')
-    src_xbig = models.CharField(u'Большая X', max_length='200')
-    src_xxbig = models.CharField(u'Большая XX', max_length='200')
+    #src = models.CharField(u'Иконка', max_length='200')
+    #src_big = models.CharField(u'Большая', max_length='200')
+    #src_small = models.CharField(u'Маленькая', max_length='200')
+    #src_xbig = models.CharField(u'Большая X', max_length='200')
+    #src_xxbig = models.CharField(u'Большая XX', max_length='200')
+
+    photo_75 = models.CharField(u'Иконка', max_length='200')
+    photo_130 = models.CharField(u'Большая', max_length='200')
+    photo_604 = models.CharField(u'Маленькая', max_length='200')
+    photo_807 = models.CharField(u'Большая X', max_length='200')
+    photo_1280 = models.CharField(u'Большая XX', max_length='200')
 
     width = models.PositiveIntegerField(null=True)
     height = models.PositiveIntegerField(null=True)
