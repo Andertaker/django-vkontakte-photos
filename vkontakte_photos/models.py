@@ -236,6 +236,10 @@ class Photo(OwnerableModelMixin, LikableModelMixin, CommentableModelMixin, Vkont
         verbose_name_plural = u'Фотографии Вконтакте'
 
     @property
+    def src(self):
+        return self.photo_130
+
+    @property
     def created(self):
         return self.date
 

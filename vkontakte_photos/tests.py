@@ -210,18 +210,12 @@ class VkontaktePhotosTest(TestCase):
     def test_parse_photo(self):
 
         response = '''{"response":[{"id":"146771291","album_id":"100001227","owner_id":6492,
-            "src":"http://cs9231.vkontakte.ru/u06492/100001227/m_7875d2fb.jpg",
-            "src_big":"http://cs9231.vkontakte.ru/u06492/100001227/x_cd563004.jpg",
-            "src_small":"http://cs9231.vkontakte.ru/u06492/100001227/s_c3bba2a8.jpg",
-            "src_xbig":"http://cs9231.vkontakte.ru/u06492/100001227/y_62a74569.jpg",
-            "src_xxbig":"http://cs9231.vkontakte.ru/u06492/100001227/z_793e9682.jpg",
+            "photo_130":"http://cs9231.vkontakte.ru/u06492/100001227/m_7875d2fb.jpg",
             "text":"test","user_id":6492,"width":10,"height":10,
-            "date":"1298365200"},{"id":"146772677","album_id":"100001227","owner_id":-6492,
-            "src":"http://cs9231.vkontakte.ru/u06492/100001227/m_fd092958.jpg",
-            "src_big":"http://cs9231.vkontakte.ru/u06492/100001227/x_1f8ec9b8.jpg",
-            "src_small":"http://cs9231.vkontakte.ru/u06492/100001227/s_603d27ab.jpg",
-            "src_xbig":"http://cs9231.vkontakte.ru/u06492/100001227/y_6938f576.jpg",
-            "src_xxbig":"http://cs9231.vkontakte.ru/u06492/100001227/z_6a27e9fd.jpg",
+            "date":"1298365200"},
+
+            {"id":"146772677","album_id":"100001227","owner_id":-6492,
+            "photo_130":"http://cs9231.vkontakte.ru/u06492/100001227/m_fd092958.jpg",
             "text":"test","user_id":6492,"width":10,"height":10,
             "date":"1260887080"}]}
             '''
@@ -234,6 +228,7 @@ class VkontaktePhotosTest(TestCase):
         self.assertEqual(instance.remote_id, 146771291)
         self.assertEqual(instance.album, album)
         self.assertEqual(instance.owner, owner)
+        self.assertEqual(instance.src, instance.photo_130)
         self.assertEqual(instance.src, 'http://cs9231.vkontakte.ru/u06492/100001227/m_7875d2fb.jpg')
         self.assertEqual(instance.text, 'test')
         self.assertEqual(instance.width, 10)
