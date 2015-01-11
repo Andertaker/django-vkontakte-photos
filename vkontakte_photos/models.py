@@ -26,8 +26,9 @@ ALBUM_PRIVACY_CHOCIES = (
 
 
 class AlbumRemoteManager(AfterBeforeManagerMixin):
-    version = 5.27
 
+    methods_namespace = 'photos'
+    version = 5.27
     timeline_force_ordering = True
 
     def get_timeline_date(self, instance):
@@ -62,6 +63,7 @@ class AlbumRemoteManager(AfterBeforeManagerMixin):
 
 class PhotoRemoteManager(CountOffsetManagerMixin, AfterBeforeManagerMixin):
 
+    methods_namespace = 'photos'
     version = 5.27
     timeline_cut_fieldname = 'date'
     timeline_force_ordering = True
@@ -145,7 +147,7 @@ class PhotosAbstractModel(VkontakteModel):
 @python_2_unicode_compatible
 class Album(OwnerableModelMixin, VkontaktePKModel):
 
-    methods_namespace = 'photos'
+    #methods_namespace = 'photos'
     slug_prefix = 'album'
 
     # TODO: migrate to ContentType framework, remove vkontakte_users and vkontakte_groups dependencies
@@ -184,7 +186,7 @@ class Album(OwnerableModelMixin, VkontaktePKModel):
 
 class Photo(OwnerableModelMixin, LikableModelMixin, CommentableModelMixin, VkontaktePKModel):
 
-    methods_namespace = 'photos'
+    #methods_namespace = 'photos'
     slug_prefix = 'photo'
 
     comments_remote_related_name = 'photo_id'
