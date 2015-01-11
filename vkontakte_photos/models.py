@@ -179,6 +179,10 @@ class Album(OwnerableModelMixin, VkontaktePKModel):
     def __str__(self):
         return self.title
 
+    @property
+    def slug(self):
+        return 'album%s_%s' % (self.owner_remote_id, self.remote_id)
+
     @transaction.commit_on_success
     def fetch_photos(self, *args, **kwargs):
         return Photo.remote.fetch(album=self, *args, **kwargs)
@@ -242,6 +246,10 @@ class Photo(OwnerableModelMixin, LikableModelMixin, CommentableModelMixin, Vkont
     @property
     def created(self):
         return self.date
+
+    @property
+    def slug(self):
+        return 'photo%s_%s' % (self.owner_remote_id, self.remote_id)
 
     def parse(self, response):
         super(Photo, self).parse(response)
