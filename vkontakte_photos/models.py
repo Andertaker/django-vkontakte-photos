@@ -265,7 +265,7 @@ class Photo(OwnerableModelMixin, LikableModelMixin, CommentableModelMixin, Vkont
             'act': 'photo_comments',
             'al': 1,
             'offset': 0,
-            'photo': self.remote_id,
+            'photo': '%s_%s' % (self.owner_remote_id, self.remote_id),
         }
         parser = VkontaktePhotosParser().request('/al_photos.php', data=post_data)
 
@@ -280,8 +280,8 @@ class Photo(OwnerableModelMixin, LikableModelMixin, CommentableModelMixin, Vkont
         post_data = {
             'act': 'a_get_stats',
             'al': 1,
-            'list': 'album%s_%s' % (self.album.owner_remote_id, self.album.remote_id),
-            'object': 'photo%s_%s' % (self.album.remote_id, self.remote_id),
+            'list': 'album%s_%s' % (self.owner_remote_id, self.album.remote_id),
+            'object': 'photo%s_%s' % (self.owner_remote_id, self.remote_id),
         }
         parser = VkontaktePhotosParser().request('/like.php', data=post_data)
 

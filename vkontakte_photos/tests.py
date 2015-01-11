@@ -170,7 +170,7 @@ class VkontaktePhotosTest(TestCase):
 
         group = GroupFactory(remote_id=GROUP_ID)
         album = AlbumFactory(remote_id=ALBUM_ID, owner=group)
-        photo = PhotoFactory(remote_id=PHOTO_ID, album=album)
+        photo = PhotoFactory(remote_id=PHOTO_ID, album=album, owner=group)
 
         #self.assertEqual(photo.comments_count, 0)
         photo.fetch_comments_parser()
