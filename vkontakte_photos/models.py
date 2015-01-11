@@ -235,9 +235,9 @@ class Photo(OwnerableModelMixin, LikableModelMixin, CommentableModelMixin, Vkont
         super(Photo, self).parse(response)
 
         # counters
-#        for field_name in ['likes', 'comments', 'tags']:
-#            if field_name in response and 'count' in response[field_name]:
-#                setattr(self, '%s_count' % field_name, response[field_name]['count'])
+        for field_name in ['tags']:  # ['likes', 'comments', 'tags']:
+            if field_name in response and 'count' in response[field_name]:
+                setattr(self, '%s_count' % field_name, response[field_name]['count'])
 
         if not self.likes_count:
             self.likes_count = 0
