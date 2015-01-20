@@ -28,6 +28,11 @@ class AlbumRemoteManager(AfterBeforeManagerMixin):
 
     methods_namespace = 'photos'
     version = 5.27
+    # remote_pk=('remote_id',)
+    methods = {
+        'get': 'getAlbums',
+#        'edit': 'editAlbum',
+    }
     timeline_force_ordering = True
 
     def get_timeline_date(self, instance):
@@ -64,6 +69,8 @@ class PhotoRemoteManager(CountOffsetManagerMixin, AfterBeforeManagerMixin):
 
     methods_namespace = 'photos'
     version = 5.27
+    #remote_pk = ('remote_id',)
+    methods = {'get': 'get', }
     timeline_cut_fieldname = 'date'
     timeline_force_ordering = True
 
@@ -116,10 +123,7 @@ class Album(OwnerableModelMixin, VkontaktePKModel):
     privacy = models.PositiveIntegerField(u'Уровень доступа к альбому', null=True, choices=ALBUM_PRIVACY_CHOCIES)
 
     objects = models.Manager()
-    remote = AlbumRemoteManager(remote_pk=('remote_id',), methods={
-        'get': 'getAlbums',
-#        'edit': 'editAlbum',
-    })
+    remote = AlbumRemoteManager()
 
     class Meta:
         verbose_name = u'Альбом фотографий Вконтакте'
@@ -169,9 +173,7 @@ class Photo(OwnerableModelMixin, LikableModelMixin, CommentableModelMixin, Vkont
     date = models.DateTimeField(db_index=True)
 
     objects = models.Manager()
-    remote = PhotoRemoteManager(remote_pk=('remote_id',), methods={
-        'get': 'get',
-    })
+    remote = PhotoRemoteManager()
 
     class Meta:
         verbose_name = u'Фотография Вконтакте'
