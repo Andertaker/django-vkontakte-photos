@@ -1,35 +1,41 @@
-from django.utils import timezone
+from datetime import datetime
 import random
-import factory
 
+import factory
 from vkontakte_groups.factories import GroupFactory
 from vkontakte_users.factories import UserFactory
 
-from . models import Album, Photo
+from . import models
 
 
 class AlbumFactory(factory.DjangoModelFactory):
-    FACTORY_FOR = Album
 
     remote_id = factory.LazyAttributeSequence(lambda o, n: '-%s_%s' % (o.group.remote_id, n))
     thumb_id = factory.Sequence(lambda n: n)
 
-    #owner = factory.SubFactory(GroupFactory)
+    #group = factory.SubFactory(GroupFactory)
 
-    created = timezone.now()
-    updated = timezone.now()
+    created = factory.LazyAttribute(lambda o: datetime.now())
+    updated = factory.LazyAttribute(lambda o: datetime.now())
     size = 1
+
+    class Meta:
+        model = models.Album
 
 
 class PhotoFactory(factory.DjangoModelFactory):
-    FACTORY_FOR = Photo
 
     remote_id = factory.LazyAttributeSequence(lambda o, n: '%s_%s' % (o.group.remote_id, n))
-    user = factory.SubFactory(UserFactory)
+    #user = factory.SubFactory(UserFactory)
     album = factory.SubFactory(AlbumFactory)
-    #owner = factory.SubFactory(GroupFactory)
-    likes_count = 0
+    #group = factory.SubFactory(GroupFactory)
 
-    date = timezone.now()
+    created = factory.LazyAttribute(lambda o: datetime.now())
+    date = factory.LazyAttribute(lambda o: datetime.now())
+    actions_count = factory.LazyAttribute(lambda o: random.randrange(100))
+    likes_count = 0
     width = 10
     height = 10
+
+    class Meta:
+        model = models.Photo
