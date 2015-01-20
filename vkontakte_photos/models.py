@@ -7,6 +7,7 @@ from django.utils.encoding import python_2_unicode_compatible
 import logging
 from parser import VkontaktePhotosParser
 import re
+import requests
 
 from vkontakte_api.decorators import fetch_all
 from vkontakte_api.mixins import CountOffsetManagerMixin, AfterBeforeManagerMixin, OwnerableModelMixin, LikableModelMixin
@@ -139,6 +140,41 @@ class Album(OwnerableModelMixin, VkontaktePKModel):
     @transaction.commit_on_success
     def fetch_photos(self, *args, **kwargs):
         return Photo.remote.fetch(album=self, *args, **kwargs)
+
+    def get_upload_url(self):
+        kwargs = {}
+        kwargs['album_id'] = self.remote_id
+        if self.owner._meta.module_name == 'group':
+            kwargs['group_id'] = self.owner.remote_id
+
+        remote = AlbumRemoteManager()
+        remote.model = Album
+
+        response = remote.api_call(method='getUploadServer', **kwargs)  # photos.getUploadServer
+
+        return response['upload_url']
+
+    def upload_photo(self, files):
+        url = self.get_upload_url()
+        r = requests.post(url, files=files)
+
+        # photos.save
+        data = r.json()
+
+        kwargs = {}
+        kwargs['album_id'] = data['aid']
+        kwargs['group_id'] = data['gid']
+        kwargs['server'] = data['server']
+        kwargs['hash'] = data['hash']
+        kwargs['photos_list'] = data['photos_list']
+        # kwargs['caption'] = ''  # текст описания фотографии.
+
+        remote = AlbumRemoteManager()
+        remote.model = Album
+
+        response = remote.api_call(method='save', **kwargs)  # photos.save
+
+        return response
 
 
 class Photo(OwnerableModelMixin, LikableModelMixin, CommentableModelMixin, VkontaktePKModel):
