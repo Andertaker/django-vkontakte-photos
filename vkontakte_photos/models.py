@@ -155,8 +155,16 @@ class Album(OwnerableModelMixin, VkontaktePKModel):
         return response['upload_url']
 
     def upload_photo(self, files):
+        if len(files) == 0:
+            raise Exception("No files to upload")
+
+        files_dict = {}
+        for i, file in enumerate(files):
+            key = "file%d" % i
+            files_dict[key] = file
+
         url = self.get_upload_url()
-        r = requests.post(url, files=files)
+        r = requests.post(url, files=files_dict)
 
         # photos.save
         data = r.json()
