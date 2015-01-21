@@ -151,7 +151,7 @@ class Album(OwnerableModelMixin, VkontaktePKModel):
     def fetch_photos(self, *args, **kwargs):
         return Photo.remote.fetch(album=self, *args, **kwargs)
 
-    def upload_photo(self, files):
+    def upload_photo(self, files, caption=''):
         if len(files) == 0:
             raise Exception("No files to upload")
 
@@ -175,11 +175,20 @@ class Album(OwnerableModelMixin, VkontaktePKModel):
         kwargs['server'] = data['server']
         kwargs['hash'] = data['hash']
         kwargs['photos_list'] = data['photos_list']
-        # kwargs['caption'] = ''  # текст описания фотографии.
+        if caption:
+            kwargs['caption'] = caption  # текст описания фотографии.
 
         response = manager.api_call(method='save', **kwargs)  # photos.save
 
-        return response
+        photos = []
+
+        for r in response:
+            p = Photo()
+            p.parse(r)
+            p.save()
+            photos.append(p)
+
+        return photos
 
 
 class Photo(OwnerableModelMixin, LikableModelMixin, CommentableModelMixin, VkontaktePKModel, VkontakteCRUDModel):
