@@ -65,6 +65,16 @@ class AlbumRemoteManager(AfterBeforeManagerMixin):
 
         return super(AlbumRemoteManager, self).fetch(**kwargs)
 
+    def get_upload_url(self, album):
+        kwargs = {}
+        kwargs['album_id'] = album.remote_id
+        if album.owner._meta.module_name == 'group':
+            kwargs['group_id'] = album.owner.remote_id
+
+        response = self.api_call(method='getUploadServer', **kwargs)  # photos.getUploadServer
+
+        return response['upload_url']
+
 
 class PhotoRemoteManager(CountOffsetManagerMixin, AfterBeforeManagerMixin):
 
@@ -141,19 +151,6 @@ class Album(OwnerableModelMixin, VkontaktePKModel):
     def fetch_photos(self, *args, **kwargs):
         return Photo.remote.fetch(album=self, *args, **kwargs)
 
-    def get_upload_url(self):
-        kwargs = {}
-        kwargs['album_id'] = self.remote_id
-        if self.owner._meta.module_name == 'group':
-            kwargs['group_id'] = self.owner.remote_id
-
-        remote = AlbumRemoteManager()
-        remote.model = Album
-
-        response = remote.api_call(method='getUploadServer', **kwargs)  # photos.getUploadServer
-
-        return response['upload_url']
-
     def upload_photo(self, files):
         if len(files) == 0:
             raise Exception("No files to upload")
@@ -163,7 +160,9 @@ class Album(OwnerableModelMixin, VkontaktePKModel):
             key = "file%d" % i
             files_dict[key] = file
 
-        url = self.get_upload_url()
+        manager = AlbumRemoteManager()
+
+        url = manager.get_upload_url(self)
         r = requests.post(url, files=files_dict)
 
         # photos.save
@@ -178,10 +177,7 @@ class Album(OwnerableModelMixin, VkontaktePKModel):
         kwargs['photos_list'] = data['photos_list']
         # kwargs['caption'] = ''  # текст описания фотографии.
 
-        remote = AlbumRemoteManager()
-        remote.model = Album
-
-        response = remote.api_call(method='save', **kwargs)  # photos.save
+        response = manager.api_call(method='save', **kwargs)  # photos.save
 
         return response
 
