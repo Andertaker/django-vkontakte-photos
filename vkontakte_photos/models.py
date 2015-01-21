@@ -71,7 +71,7 @@ class PhotoRemoteManager(CountOffsetManagerMixin, AfterBeforeManagerMixin):
     methods_namespace = 'photos'
     version = 5.27
     #remote_pk = ('remote_id',)
-    methods = {'get': 'get', }
+    methods = {'get': 'get', 'delete': 'delete', }
     timeline_cut_fieldname = 'date'
     timeline_force_ordering = True
 
@@ -186,10 +186,11 @@ class Album(OwnerableModelMixin, VkontaktePKModel):
         return response
 
 
-class Photo(OwnerableModelMixin, LikableModelMixin, CommentableModelMixin, VkontaktePKModel):
+class Photo(OwnerableModelMixin, LikableModelMixin, CommentableModelMixin, VkontaktePKModel, VkontakteCRUDModel):
 
     comments_remote_related_name = 'photo_id'
     likes_remote_type = 'photo'
+    _commit_remote = False
 
     album = models.ForeignKey(Album, verbose_name=u'Альбом', related_name='photos')
     user = models.ForeignKey(User, verbose_name=u'Автор фотографии', null=True, related_name='photos_author')
@@ -294,3 +295,10 @@ class Photo(OwnerableModelMixin, LikableModelMixin, CommentableModelMixin, Vkont
         if len(values):
             self.likes_count = int(values[0])
             self.save()
+
+    def prepare_delete_params(self):
+        return {
+            'owner_id': self.owner_remote_id,
+            'photo_id': self.remote_id,
+            #'methods_namespace': get_methods_namespace(self),
+        }
