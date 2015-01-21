@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from django.test import TestCase
 from django.utils import timezone
+from os.path import join, dirname
 
 import mock
 from vkontakte_groups.factories import GroupFactory
@@ -325,3 +326,46 @@ class VkontaktePhotosTest(TestCase):
 
         self.assertEqual(Comment.objects.count(), 2)
         assert_local_equal_to_remote(comment)
+
+
+class VkontakteUploadPhotos(TestCase):
+
+    def setUp(self):
+        self.objects_to_delete = []
+
+        path = dirname(__file__)
+        path = join(path, 'tests')
+
+        file1 = join(path, 'test_photo1.jpg')
+        file2 = join(path, 'test_photo2.png')
+
+        self.files = [open(file1, 'rb'),
+                      open(file2, 'rb')]
+
+    def tearDown(self):
+        for object in self.objects_to_delete:
+            object.delete(commit_remote=True)
+
+    def test_upload_to_group_album(self):
+        group = GroupFactory(remote_id=59154616)
+        album = AlbumFactory(remote_id=209832918, owner=group)
+
+        caption = 'test_upload'
+        photos = album.upload_photos(self.files, caption=caption)
+
+        self.objects_to_delete += photos  # delete photos
+
+        self.assertEqual(len(photos), 2)
+        self.assertEqual(photos[0].text, caption)
+
+    def test_upload_to_user_album(self):
+        user = UserFactory(remote_id=201164356)
+        album = AlbumFactory(remote_id=209873101, owner=user)
+
+        caption = 'test_upload'
+        photos = album.upload_photos(self.files, caption=caption)
+
+        self.objects_to_delete += photos  # delete photos
+
+        self.assertEqual(len(photos), 2)
+        self.assertEqual(photos[0].text, caption)
