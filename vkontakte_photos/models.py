@@ -171,7 +171,8 @@ class Album(OwnerableModelMixin, VkontaktePKModel):
 
         kwargs = {}
         kwargs['album_id'] = data['aid']
-        kwargs['group_id'] = data['gid']
+        if 'gid' in data:
+            kwargs['group_id'] = data['gid']
         kwargs['server'] = data['server']
         kwargs['hash'] = data['hash']
         kwargs['photos_list'] = data['photos_list']
