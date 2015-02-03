@@ -338,8 +338,10 @@ class VkontakteUploadPhotos(TestCase):
 
         file1 = join(path, 'test_photo1.jpg')
         file2 = join(path, 'test_photo2.png')
+        file3 = join(path, 'тест_фото3.jpg')
+        file3_1 = join(path, u'тест_фото3.jpg')
 
-        self.files = [file1, file2]
+        self.files = [file1, file2, file3, file3_1]
 
     def tearDown(self):
         for object in self.objects_to_delete:
@@ -354,7 +356,7 @@ class VkontakteUploadPhotos(TestCase):
 
         self.objects_to_delete += photos  # delete photos
 
-        self.assertEqual(len(photos), 2)
+        self.assertEqual(len(photos), len(self.files))
         self.assertEqual(photos[0].text, caption)
 
     def test_upload_to_user_album(self):
@@ -366,5 +368,5 @@ class VkontakteUploadPhotos(TestCase):
 
         self.objects_to_delete += photos  # delete photos
 
-        self.assertEqual(len(photos), 2)
+        self.assertEqual(len(photos), len(self.files))
         self.assertEqual(photos[0].text, caption)

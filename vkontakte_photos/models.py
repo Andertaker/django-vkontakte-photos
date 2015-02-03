@@ -157,9 +157,9 @@ class Album(OwnerableModelMixin, VkontaktePKModel):
 
         files_dict = {}
         for i, path in enumerate(files):
-            key = "file%d" % i
-            file_path = path.__str__() # its need to get str from unicode string
-            files_dict[key] = open(file_path, 'rb')
+            key = "file%d" % i # file0, file1, file2...
+            file_name = key + '.' + path.split('.').pop() # -> file0.jpg
+            files_dict[key] = (file_name, open(path, 'rb'),)
 
         manager = AlbumRemoteManager()
 
