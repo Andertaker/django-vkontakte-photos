@@ -168,27 +168,31 @@ class Album(OwnerableModelMixin, VkontaktePKModel):
         # photos.save
         data = r.json()
 
-        kwargs = {}
-        kwargs['album_id'] = data['aid']
-        if 'gid' in data:
-            kwargs['group_id'] = data['gid']
-        kwargs['server'] = data['server']
-        kwargs['hash'] = data['hash']
-        kwargs['photos_list'] = data['photos_list']
-        if caption:
-            kwargs['caption'] = caption  # текст описания фотографии.
+        if not data['photos_list'] or data['photos_list'] == '[]': # empty
+            #return []
+            raise Exception("Some error oquired no files was uploaded.")
+        else:
+            kwargs = {}
+            kwargs['album_id'] = data['aid']
+            if 'gid' in data:
+                kwargs['group_id'] = data['gid']
+            kwargs['server'] = data['server']
+            kwargs['hash'] = data['hash']
+            kwargs['photos_list'] = data['photos_list']
+            if caption:
+                kwargs['caption'] = caption  # текст описания фотографии.
 
-        response = manager.api_call(method='save', **kwargs)  # photos.save
+            response = manager.api_call(method='save', **kwargs)  # photos.save
 
-        photos = []
+            photos = []
 
-        for r in response:
-            p = Photo()
-            p.parse(r)
-            p.save()
-            photos.append(p)
+            for r in response:
+                p = Photo()
+                p.parse(r)
+                p.save()
+                photos.append(p)
 
-        return photos
+            return photos
 
 
 class Photo(OwnerableModelMixin, LikableModelMixin, CommentableModelMixin, VkontaktePKModel, VkontakteCRUDModel):
