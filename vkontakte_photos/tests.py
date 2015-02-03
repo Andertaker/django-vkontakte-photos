@@ -339,8 +339,7 @@ class VkontakteUploadPhotos(TestCase):
         file1 = join(path, 'test_photo1.jpg')
         file2 = join(path, 'test_photo2.png')
 
-        self.files = [open(file1, 'rb'),
-                      open(file2, 'rb')]
+        self.files = [file1, file2]
 
     def tearDown(self):
         for object in self.objects_to_delete:

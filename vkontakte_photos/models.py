@@ -156,9 +156,10 @@ class Album(OwnerableModelMixin, VkontaktePKModel):
             raise Exception("No files to upload")
 
         files_dict = {}
-        for i, file in enumerate(files):
+        for i, path in enumerate(files):
             key = "file%d" % i
-            files_dict[key] = file
+            file_path = path.__str__() # its need to get str from unicode string
+            files_dict[key] = open(file_path, 'rb')
 
         manager = AlbumRemoteManager()
 
@@ -170,7 +171,7 @@ class Album(OwnerableModelMixin, VkontaktePKModel):
 
         if not data['photos_list'] or data['photos_list'] == '[]': # empty
             #return []
-            raise Exception("Some error oquired no files was uploaded.")
+            raise Exception("Some error was occurred no files was uploaded.")
         else:
             kwargs = {}
             kwargs['album_id'] = data['aid']
