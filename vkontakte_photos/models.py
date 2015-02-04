@@ -151,6 +151,14 @@ class Album(OwnerableModelMixin, VkontaktePKModel):
     def fetch_photos(self, *args, **kwargs):
         return Photo.remote.fetch(album=self, *args, **kwargs)
 
+    def get_upload_url(self):
+        if not (hasattr(self, 'upload_url') and self.upload_url):
+            manager = AlbumRemoteManager()
+            upload_url = manager.get_upload_url(self)
+            setattr(self, 'upload_url', upload_url)
+
+        return self.upload_url
+
     def upload_photos(self, files, caption=''):
         if len(files) == 0:
             raise Exception("No files to upload")
@@ -163,7 +171,7 @@ class Album(OwnerableModelMixin, VkontaktePKModel):
 
         manager = AlbumRemoteManager()
 
-        url = manager.get_upload_url(self)
+        url = self.get_upload_url()
         r = requests.post(url, files=files_dict)
 
         # photos.save
