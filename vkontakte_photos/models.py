@@ -154,6 +154,8 @@ class Album(OwnerableModelMixin, VkontaktePKModel):
     def get_upload_url(self):
         if not (hasattr(self, 'upload_url') and self.upload_url):
             manager = AlbumRemoteManager()
+            manager.model = Album
+
             upload_url = manager.get_upload_url(self)
             setattr(self, 'upload_url', upload_url)
 
@@ -170,6 +172,7 @@ class Album(OwnerableModelMixin, VkontaktePKModel):
             files_dict[key] = (file_name, open(path, 'rb'),)
 
         manager = AlbumRemoteManager()
+        manager.model = Album
 
         url = self.get_upload_url()
         r = requests.post(url, files=files_dict)
